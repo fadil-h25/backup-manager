@@ -29,3 +29,5 @@ lerna-debug.log*
 
 # Docs
 /docs
+
+chat.js
