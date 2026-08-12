@@ -95,30 +95,56 @@ export const updateBackupTarget = (
     id: number,
     input: UpdateBackupTargetInput
 ): BackupTarget | null => {
-    const encryptedPassword = encrypt(input.password)
-    const result = db
-        .prepare(`
-      UPDATE backup_targets
-      SET
-        database_name = ?,
-        host = ?,
-        port = ?,
-        username = ?,
-        password = ?,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `)
-        .run(
-            input.databaseName,
-            input.host,
-            input.port,
-            input.username,
-            encryptedPassword,
-            id
-        )
+    if (input.password) {
+        const encryptedPassword = encrypt(input.password)
 
-    if (result.changes === 0) {
-        return null
+        const result = db
+            .prepare(`
+        UPDATE backup_targets
+        SET
+          database_name = ?,
+          host = ?,
+          port = ?,
+          username = ?,
+          password = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `)
+            .run(
+                input.databaseName,
+                input.host,
+                input.port,
+                input.username,
+                encryptedPassword,
+                id
+            )
+
+        if (result.changes === 0) {
+            return null
+        }
+    } else {
+        const result = db
+            .prepare(`
+        UPDATE backup_targets
+        SET
+          database_name = ?,
+          host = ?,
+          port = ?,
+          username = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `)
+            .run(
+                input.databaseName,
+                input.host,
+                input.port,
+                input.username,
+                id
+            )
+
+        if (result.changes === 0) {
+            return null
+        }
     }
 
     return getBackupTargetById(id)

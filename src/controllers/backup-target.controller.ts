@@ -152,8 +152,7 @@ export const updateBackupTargetController = async (c: Context) => {
             !body.databaseName ||
             !body.host ||
             !body.port ||
-            !body.username ||
-            !body.password
+            !body.username
         ) {
             return c.json(
                 {
