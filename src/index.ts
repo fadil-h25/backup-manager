@@ -15,6 +15,7 @@ import {
   getBackupTargetsController, deleteBackupTargetController, updateBackupTargetController
 } from './controllers/backup-target.controller.js'
 import { DashboardPage } from './pages/dashboard/index.js'
+import { BackupTargetsPage } from './pages/backup-target/index.js'
 initDatabase();
 
 app.get('/', (c) => {
@@ -28,6 +29,10 @@ app.get('/login', (c) => {
 app.get('/dashboard', (c) => {
   return c.html(DashboardPage());
 });
+app.get('/backup-targets', (c) => {
+  return c.html(BackupTargetsPage());
+});
+
 // API
 // Auth
 app.post('/api/login', loginController);
