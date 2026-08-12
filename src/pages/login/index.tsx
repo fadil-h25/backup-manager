@@ -1,8 +1,8 @@
-import { AppLayout } from '../../components/layout/AppLayout.js'
+import { PublicLayout } from '../../components/layout/PublicLayout.js'
 
 export const LoginPage = () => {
     return (
-        <AppLayout title="Login">
+        <PublicLayout title="Login">
             <main class="bg-gray-100 flex items-center justify-center h-screen">
                 <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md border border-gray-200">
                     <div class="text-center mb-6">
@@ -55,6 +55,6 @@ export const LoginPage = () => {
                     </form>
                 </div>
             </main>
-        </AppLayout>
+        </PublicLayout>
     )
 }
