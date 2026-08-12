@@ -26,8 +26,10 @@ export const initDatabase = () => {
         username TEXT NOT NULL,
         password TEXT NOT NULL,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        );
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        UNIQUE (host, port, database_name)
+    );
   `)
 
     // Cek apakah sudah ada user

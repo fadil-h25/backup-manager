@@ -91,6 +91,7 @@ export const BackupTargetList = ({
 
                                         <button
                                             type="button"
+                                            onclick={`if (confirm('Apakah Anda yakin ingin menghapus backup target ini?')) { fetch('/api/backup-targets/${target.id}', { method: 'DELETE' }).then(res => res.json()).then(data => { if (data.success) { alert(data.message); window.location.reload(); } else { alert(data.message || 'Gagal menghapus'); } }).catch(err => { alert('Terjadi kesalahan'); console.error(err); }); }`}
                                             class="px-3 py-1.5 rounded-md bg-red-600 text-white text-xs font-medium hover:bg-red-700"
                                         >
                                             Hapus

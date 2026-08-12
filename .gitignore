@@ -30,4 +30,11 @@ lerna-debug.log*
 # Docs
 /docs
 
+# Build
+dist/
+
+# Database Sqlite
+*.db
+database.db
+
 chat.js

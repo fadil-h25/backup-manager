@@ -16,6 +16,9 @@ import {
 } from './controllers/backup-target.controller.js'
 import { DashboardPage } from './pages/dashboard/index.js'
 import { BackupTargetsPage } from './pages/backup-target/index.js'
+import { BackupTargetCreatePage } from './pages/backup-target/create.js'
+import { BackupTargetEditPage } from './pages/backup-target/edit.js'
+import { getBackupTargetById } from './services/backup-target.service.js'
 initDatabase();
 
 app.get('/', (c) => {
@@ -31,6 +34,17 @@ app.get('/dashboard', (c) => {
 });
 app.get('/backup-targets', (c) => {
   return c.html(BackupTargetsPage());
+});
+app.get('/backup-targets/create', (c) => {
+  return c.html(BackupTargetCreatePage());
+});
+app.get('/backup-targets/:id/edit', (c) => {
+  const id = Number(c.req.param('id'));
+  const target = getBackupTargetById(id);
+  if (!target) {
+    return c.text('Backup target tidak ditemukan.', 404);
+  }
+  return c.html(BackupTargetEditPage({ target }));
 });
 
 // API
