@@ -1,4 +1,4 @@
-import { AppLayout } from '../../components/layouts/AppLayout.js'
+import { AppLayout } from '../../components/layout/AppLayout.js'
 
 export const LoginPage = () => {
     return (
