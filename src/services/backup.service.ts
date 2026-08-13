@@ -183,3 +183,46 @@ export const createBackupHistory = async (
     }
 }
 
+export const getBackupHistoryList = (): (BackupHistory & { databaseName: string; host: string })[] => {
+    const rows = db
+        .prepare(`
+            SELECT 
+                h.id,
+                h.backup_target_id,
+                h.file_name,
+                h.file_path,
+                h.file_size,
+                h.status,
+                h.created_at,
+                t.database_name,
+                t.host
+            FROM backup_history h
+            LEFT JOIN backup_targets t ON h.backup_target_id = t.id
+            ORDER BY h.id DESC
+        `)
+        .all() as Array<{
+            id: number
+            backup_target_id: number
+            file_name: string
+            file_path: string
+            file_size: number
+            status: string
+            created_at: string
+            database_name: string | null
+            host: string | null
+        }>
+
+    return rows.map((r) => ({
+        id: r.id,
+        backupTargetId: r.backup_target_id,
+        fileName: r.file_name,
+        filePath: r.file_path,
+        fileSize: r.file_size,
+        status: r.status,
+        createdAt: r.created_at,
+        databaseName: r.database_name || 'Deleted Target',
+        host: r.host || 'Unknown',
+    }))
+}
+
+

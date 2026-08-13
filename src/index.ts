@@ -20,7 +20,8 @@ import { BackupTargetCreatePage } from './pages/backup-target/create.js'
 import { BackupTargetEditPage } from './pages/backup-target/edit.js'
 import { getBackupTargetById } from './services/backup-target.service.js'
 import { testMySQLConnectionController } from './controllers/mysql.controller.js'
-import { createBackupController } from './controllers/backup.controller.js'
+import { createBackupController, getBackupHistoryController } from './controllers/backup.controller.js'
+import { BackupHistoryPage } from './pages/backup-history/index.js'
 initDatabase();
 
 app.get('/', (c) => {
@@ -48,6 +49,9 @@ app.get('/backup-targets/:id/edit', (c) => {
   }
   return c.html(BackupTargetEditPage({ target }));
 });
+app.get('/backup-history', (c) => {
+  return c.html(BackupHistoryPage());
+});
 
 // API
 // Auth
@@ -70,6 +74,10 @@ app.get(
 app.post(
   '/api/backup-targets/:id/backup',
   createBackupController
+);
+app.get(
+  '/api/backup-history',
+  getBackupHistoryController
 );
 
 
