@@ -1,11 +1,13 @@
 import type { Context } from 'hono'
-import { generateDatabaseBackup } from '../services/backup.service.js'
+import { createBackup } from '../services/backup.service.js'
 
 export const createBackupController = async (
     c: Context
 ) => {
     try {
-        const backupTargetId = Number(c.req.param('id'))
+        const backupTargetId = Number(
+            c.req.param('id')
+        )
 
         if (
             !Number.isInteger(backupTargetId) ||
@@ -20,14 +22,14 @@ export const createBackupController = async (
             )
         }
 
-        const backup = await generateDatabaseBackup(
+        const result = await createBackup(
             backupTargetId
         )
 
         return c.json({
             success: true,
             message: 'Backup berhasil dibuat.',
-            data: backup,
+            data: result,
         })
     } catch (error) {
         console.error('Create backup error:', error)

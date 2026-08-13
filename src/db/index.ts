@@ -2,6 +2,7 @@ import Database from 'better-sqlite3'
 import path from 'path'
 import bcrypt from 'bcryptjs'
 
+
 // Lokasi file database
 const dbPath = path.join(process.cwd(), 'database.db')
 
@@ -13,7 +14,7 @@ export const initDatabase = () => {
     db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nama TEXT NOT NULL,
+        nama TEXT NOT NULL,SC  HS
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
     );
@@ -29,6 +30,20 @@ export const initDatabase = () => {
         updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
         UNIQUE (host, port, database_name)
+    );
+
+    CREATE TABLE IF NOT EXISTS backup_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        backup_target_id INTEGER NOT NULL,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        file_size INTEGER NOT NULL,
+        status TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (backup_target_id)
+            REFERENCES backup_targets(id)
+            ON DELETE CASCADE
     );
   `)
 
