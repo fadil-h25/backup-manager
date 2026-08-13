@@ -70,6 +70,7 @@ export const BackupTargetList = ({
 
                                 <td class="px-5 py-4">
                                     <span
+                                        id={`status-${target.id}`}
                                         class={
                                             target.status === 'Connected'
                                                 ? 'inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-green-100 text-green-700'
@@ -82,6 +83,46 @@ export const BackupTargetList = ({
 
                                 <td class="px-5 py-4">
                                     <div class="flex justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            onclick={`
+                                                const btn = this;
+                                                const badge = document.getElementById('status-${target.id}');
+                                                btn.disabled = true;
+                                                const originalText = btn.innerText;
+                                                btn.innerText = 'Testing...';
+                                                
+                                                badge.innerText = 'Connecting...';
+                                                badge.className = 'inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-yellow-100 text-yellow-700';
+
+                                                fetch('/api/backup-targets/${target.id}/test-connection')
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        alert(data.message);
+                                                        if (data.success) {
+                                                            badge.innerText = 'Connected';
+                                                            badge.className = 'inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-green-100 text-green-700';
+                                                        } else {
+                                                            badge.innerText = 'Disconnected';
+                                                            badge.className = 'inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-red-100 text-red-700';
+                                                        }
+                                                    })
+                                                    .catch(err => {
+                                                        alert('Terjadi kesalahan koneksi.');
+                                                        badge.innerText = 'Failed';
+                                                        badge.className = 'inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-red-100 text-red-700';
+                                                        console.error(err);
+                                                    })
+                                                    .finally(() => {
+                                                        btn.disabled = false;
+                                                        btn.innerText = originalText;
+                                                    });
+                                            `}
+                                            class="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                                        >
+                                            Test Koneksi
+                                        </button>
+
                                         <a
                                             href={`/backup-targets/${target.id}/edit`}
                                             class="px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50"

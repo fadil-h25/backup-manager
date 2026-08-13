@@ -19,6 +19,7 @@ import { BackupTargetsPage } from './pages/backup-target/index.js'
 import { BackupTargetCreatePage } from './pages/backup-target/create.js'
 import { BackupTargetEditPage } from './pages/backup-target/edit.js'
 import { getBackupTargetById } from './services/backup-target.service.js'
+import { testMySQLConnectionController } from './controllers/mysql.controller.js'
 initDatabase();
 
 app.get('/', (c) => {
@@ -57,6 +58,12 @@ app.get('/api/backup-targets', getBackupTargetsController)
 app.get('/api/backup-targets/:id', getBackupTargetByIdController)
 app.put('/api/backup-targets/:id', updateBackupTargetController)
 app.delete('/api/backup-targets/:id', deleteBackupTargetController)
+
+// MysQL Connection Test
+app.get(
+  '/api/backup-targets/:id/test-connection',
+  testMySQLConnectionController
+);
 
 
 serve({
