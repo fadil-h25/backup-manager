@@ -26,3 +26,15 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+# Docs
+/docs
+
+# Build
+dist/
+
+# Database Sqlite
+*.db
+database.db
+
+chat.js
