@@ -20,6 +20,7 @@ import { BackupTargetCreatePage } from './pages/backup-target/create.js'
 import { BackupTargetEditPage } from './pages/backup-target/edit.js'
 import { getBackupTargetById } from './services/backup-target.service.js'
 import { testMySQLConnectionController } from './controllers/mysql.controller.js'
+import { createBackupController } from './controllers/backup.controller.js'
 initDatabase();
 
 app.get('/', (c) => {
@@ -63,6 +64,12 @@ app.delete('/api/backup-targets/:id', deleteBackupTargetController)
 app.get(
   '/api/backup-targets/:id/test-connection',
   testMySQLConnectionController
+);
+
+// Backup
+app.post(
+  '/api/backup-targets/:id/backup',
+  createBackupController
 );
 
 

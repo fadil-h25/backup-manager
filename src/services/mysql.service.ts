@@ -1,8 +1,10 @@
+// src/services/mysql.service.ts
+
 import mysql from 'mysql2/promise'
 import { db } from '../db/index.js'
 import { decrypt } from '../utils/encryption.js'
 
-interface BackupTargetConnection {
+export interface MySQLTargetConfig {
     host: string
     port: number
     database: string
@@ -10,29 +12,33 @@ interface BackupTargetConnection {
     password: string
 }
 
-const getBackupTargetConnection = (
+interface BackupTargetRow {
+    host: string
+    port: number
+    database_name: string
+    username: string
+    password: string
+}
+
+/**
+ * Mengambil konfigurasi koneksi MySQL
+ * berdasarkan backup target yang tersimpan di SQLite.
+ */
+export const getMySQLTargetConfig = (
     backupTargetId: number
-): BackupTargetConnection => {
+): MySQLTargetConfig => {
     const target = db
         .prepare(`
-      SELECT
-        host,
-        port,
-        database_name,
-        username,
-        password
-      FROM backup_targets
-      WHERE id = ?
-    `)
-        .get(backupTargetId) as
-        | {
-            host: string
-            port: number
-            database_name: string
-            username: string
-            password: string
-        }
-        | undefined
+            SELECT
+                host,
+                port,
+                database_name,
+                username,
+                password
+            FROM backup_targets
+            WHERE id = ?
+        `)
+        .get(backupTargetId) as BackupTargetRow | undefined
 
     if (!target) {
         throw new Error('Backup target tidak ditemukan.')
@@ -47,14 +53,21 @@ const getBackupTargetConnection = (
     }
 }
 
+/**
+ * Membuat koneksi MySQL secara dinamis
+ * berdasarkan backup target.
+ */
 export const createMySQLConnection = async (
     backupTargetId: number
 ) => {
-    const config = getBackupTargetConnection(backupTargetId)
+    const config = getMySQLTargetConfig(backupTargetId)
 
     return mysql.createConnection(config)
 }
 
+/**
+ * Menguji koneksi ke MySQL target.
+ */
 export const testMySQLConnection = async (
     backupTargetId: number
 ): Promise<boolean> => {
