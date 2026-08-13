@@ -5,6 +5,7 @@ import { promisify } from 'node:util'
 
 import { db } from '../db/index.js'
 import { getMySQLTargetConfig } from './mysql.service.js'
+import { sendTelegramDocument } from './telegram.service.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -48,6 +49,10 @@ export const createBackup = async (
         backupTargetId,
         backup,
         'success'
+    )
+
+    await sendTelegramDocument(
+        backup.filePath
     )
 
     return {
