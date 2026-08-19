@@ -30,6 +30,7 @@ export interface BackupHistory {
     createdAt: string
 }
 
+
 const sanitizeFileName = (
     value: string
 ): string => {
@@ -42,21 +43,21 @@ const sanitizeFileName = (
 export const createBackup = async (
     backupTargetId: number
 ) => {
-    logger.debug("createBackup() called");
+    logger.debug(
+        `createBackup(${backupTargetId}) called`
+    )
+
     let backup: BackupResult | null = null
 
     try {
-        // 1. Generate backup
         backup = await generateDatabaseBackup(
             backupTargetId
         )
 
-        // 2. Kirim backup ke Telegram
         await sendTelegramDocument(
             backup.filePath
         )
 
-        // 3. Semua proses berhasil
         const history = await createBackupHistory(
             backupTargetId,
             backup,
@@ -68,13 +69,11 @@ export const createBackup = async (
             history,
         }
     } catch (error) {
-        console.error(
-            `[Backup] Backup target ${backupTargetId} gagal:`,
-            error
+        logger.error(
+            error,
+            `[Backup] Backup target ${backupTargetId} gagal`
         )
 
-        // 4. Jika backup file sudah berhasil dibuat,
-        //    simpan metadata file.
         if (backup) {
             const history = await createBackupHistory(
                 backupTargetId,
@@ -88,8 +87,6 @@ export const createBackup = async (
             }
         }
 
-        // 5. Jika generate backup gagal,
-        //    belum ada file yang bisa dicatat.
         const history = await createBackupHistory(
             backupTargetId,
             null,
@@ -106,10 +103,21 @@ export const createBackup = async (
 export const generateDatabaseBackup = async (
     backupTargetId: number
 ): Promise<BackupResult> => {
-    logger.debug("generateDatabaseBackup() called")
+    logger.debug(
+        `generateDatabaseBackup(${backupTargetId}) called`
+    )
+
     const config = getMySQLTargetConfig(
         backupTargetId
     )
+
+    logger.debug({
+        host: config.host,
+        port: config.port,
+        database: config.database,
+        user: config.user,
+        hasPassword: config.password.length > 0,
+    }, '[Backup] mysqldump configuration')
 
     await mkdir(BACKUP_DIR, {
         recursive: true,
@@ -129,6 +137,10 @@ export const generateDatabaseBackup = async (
     const filePath = path.join(
         BACKUP_DIR,
         fileName
+    )
+
+    logger.debug(
+        `[Backup] Menjalankan mysqldump: ${fileName}`
     )
 
     await execFileAsync(
@@ -155,6 +167,10 @@ export const generateDatabaseBackup = async (
         }
     )
 
+    logger.debug(
+        `[Backup] mysqldump berhasil: ${filePath}`
+    )
+
     return {
         fileName,
         filePath,
@@ -166,7 +182,10 @@ export const createBackupHistory = async (
     backup: BackupResult | null,
     status: string
 ): Promise<BackupHistory> => {
-    logger.debug("createBackupHistory() called")
+    logger.debug(
+        `createBackupHistory(${backupTargetId}) called`
+    )
+
     const fileStats = backup
         ? await stat(backup.filePath)
         : null
@@ -192,17 +211,17 @@ export const createBackupHistory = async (
 
     const history = db
         .prepare(`
-        SELECT
-            id,
-            backup_target_id,
-            file_name,
-            file_path,
-            file_size,
-            status,
-            created_at
-        FROM backup_history
-        WHERE id = ?
-    `)
+            SELECT
+                id,
+                backup_target_id,
+                file_name,
+                file_path,
+                file_size,
+                status,
+                created_at
+            FROM backup_history
+            WHERE id = ?
+        `)
         .get(
             result.lastInsertRowid
         ) as {
@@ -227,9 +246,16 @@ export const createBackupHistory = async (
     }
 }
 
-export const getBackupHistoryList = (): (BackupHistory &
-{ databaseName: string; host: string })[] => {
-    logger.debug("getBackupHistoryList");
+export const getBackupHistoryList = (): (
+    BackupHistory & {
+        databaseName: string
+        host: string
+    }
+)[] => {
+    logger.debug(
+        'getBackupHistoryList() called'
+    )
+
     const rows = db
         .prepare(`
             SELECT 
@@ -243,7 +269,8 @@ export const getBackupHistoryList = (): (BackupHistory &
                 t.database_name,
                 t.host
             FROM backup_history h
-            LEFT JOIN backup_targets t ON h.backup_target_id = t.id
+            LEFT JOIN backup_targets t
+                ON h.backup_target_id = t.id
             ORDER BY h.id DESC
         `)
         .all() as Array<{
@@ -266,9 +293,10 @@ export const getBackupHistoryList = (): (BackupHistory &
         fileSize: r.file_size,
         status: r.status,
         createdAt: r.created_at,
-        databaseName: r.database_name || 'Deleted Target',
-        host: r.host || 'Unknown',
+        databaseName:
+            r.database_name || 'Deleted Target',
+        host:
+            r.host || 'Unknown',
     }))
 }
-
 
