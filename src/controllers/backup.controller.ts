@@ -1,16 +1,28 @@
 import type { Context } from 'hono'
-import { createBackup, getBackupHistoryList } from '../services/backup.service.js'
+import {
+    createBackup,
+    getBackupHistoryList,
+} from '../services/backup.service.js'
+import { logger } from '../utils/logger.js'
 
 export const createBackupController = async (
     c: Context
 ) => {
+    logger.debug('createBackupController() called')
+
     try {
-        const backupTargetId = Number(c.req.param('id'))
+        const backupTargetId = Number(
+            c.req.param('id')
+        )
 
         if (
             !Number.isInteger(backupTargetId) ||
             backupTargetId <= 0
         ) {
+            logger.warn(
+                `[Backup] ID backup target tidak valid: ${c.req.param('id')}`
+            )
+
             return c.json(
                 {
                     success: false,
@@ -24,13 +36,21 @@ export const createBackupController = async (
             backupTargetId
         )
 
+        logger.debug(
+            backupResult,
+            '[Backup] Hasil createBackup'
+        )
+
         return c.json({
             success: true,
             message: 'Backup berhasil dibuat.',
             data: backupResult.backup,
         })
     } catch (error) {
-        console.error('Create backup error:', error)
+        logger.error(
+            error,
+            '[Backup] Gagal membuat backup'
+        )
 
         return c.json(
             {
@@ -42,15 +62,26 @@ export const createBackupController = async (
     }
 }
 
-export const getBackupHistoryController = async (c: Context) => {
+export const getBackupHistoryController = async (
+    c: Context
+) => {
+    logger.debug(
+        'getBackupHistoryController() called'
+    )
+
     try {
         const history = getBackupHistoryList()
+
         return c.json({
             success: true,
             data: history,
         })
     } catch (error) {
-        console.error('Get backup history error:', error)
+        logger.error(
+            error,
+            '[Backup History] Gagal mengambil riwayat backup'
+        )
+
         return c.json(
             {
                 success: false,
