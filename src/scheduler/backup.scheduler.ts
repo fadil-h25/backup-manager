@@ -1,18 +1,22 @@
 import cron from 'node-cron'
 import { env } from '../config/env.js'
 import { runBackupJob } from './backup.job.js'
+import { logger } from '../utils/logger.js'
 
 export function startBackupScheduler() {
+    logger.debug('startBackupScheduler() called')
 
     cron.schedule(env.backupSchedule, async () => {
 
-        console.log('[Scheduler] Menjalankan backup otomatis...')
+
+        logger.info(
+            `[Scheduler] Menjalankan backup otomatis...`
+        )
 
         await runBackupJob()
-
     })
 
-    console.log(
+    logger.info(
         `[Scheduler] Backup scheduler aktif: ${env.backupSchedule}`
     )
 }

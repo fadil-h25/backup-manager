@@ -6,6 +6,7 @@ import { promisify } from 'node:util'
 import { db } from '../db/index.js'
 import { getMySQLTargetConfig } from './mysql.service.js'
 import { sendTelegramDocument } from './telegram.service.js'
+import { logger } from '../utils/logger.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -41,6 +42,7 @@ const sanitizeFileName = (
 export const createBackup = async (
     backupTargetId: number
 ) => {
+    logger.debug("createBackup() called");
     let backup: BackupResult | null = null
 
     try {
@@ -104,6 +106,7 @@ export const createBackup = async (
 export const generateDatabaseBackup = async (
     backupTargetId: number
 ): Promise<BackupResult> => {
+    logger.debug("generateDatabaseBackup() called")
     const config = getMySQLTargetConfig(
         backupTargetId
     )
@@ -163,6 +166,7 @@ export const createBackupHistory = async (
     backup: BackupResult | null,
     status: string
 ): Promise<BackupHistory> => {
+    logger.debug("createBackupHistory() called")
     const fileStats = backup
         ? await stat(backup.filePath)
         : null
@@ -225,6 +229,7 @@ export const createBackupHistory = async (
 
 export const getBackupHistoryList = (): (BackupHistory &
 { databaseName: string; host: string })[] => {
+    logger.debug("getBackupHistoryList");
     const rows = db
         .prepare(`
             SELECT 

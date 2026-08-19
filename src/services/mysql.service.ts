@@ -3,6 +3,7 @@
 import mysql from 'mysql2/promise'
 import { db } from '../db/index.js'
 import { decrypt } from '../utils/encryption.js'
+import { logger } from '../utils/logger.js'
 
 export interface MySQLTargetConfig {
     host: string
@@ -27,6 +28,10 @@ interface BackupTargetRow {
 export const getMySQLTargetConfig = (
     backupTargetId: number
 ): MySQLTargetConfig => {
+    logger.debug(
+        `getMySQLTargetConfig(${backupTargetId}) called`
+    )
+
     const target = db
         .prepare(`
             SELECT
@@ -41,7 +46,9 @@ export const getMySQLTargetConfig = (
         .get(backupTargetId) as BackupTargetRow | undefined
 
     if (!target) {
-        throw new Error('Backup target tidak ditemukan.')
+        throw new Error(
+            'Backup target tidak ditemukan.'
+        )
     }
 
     return {
@@ -60,7 +67,13 @@ export const getMySQLTargetConfig = (
 export const createMySQLConnection = async (
     backupTargetId: number
 ) => {
-    const config = getMySQLTargetConfig(backupTargetId)
+    logger.debug(
+        `createMySQLConnection(${backupTargetId}) called`
+    )
+
+    const config = getMySQLTargetConfig(
+        backupTargetId
+    )
 
     return mysql.createConnection(config)
 }
@@ -71,12 +84,20 @@ export const createMySQLConnection = async (
 export const testMySQLConnection = async (
     backupTargetId: number
 ): Promise<boolean> => {
+    logger.debug(
+        `testMySQLConnection(${backupTargetId}) called`
+    )
+
     const connection = await createMySQLConnection(
         backupTargetId
     )
 
     try {
         await connection.ping()
+
+        logger.info(
+            `[MySQL] Koneksi berhasil: target ${backupTargetId}`
+        )
 
         return true
     } finally {

@@ -1,31 +1,36 @@
 import { getBackupTargets } from '../services/backup-target.service.js'
 import { createBackup } from '../services/backup.service.js'
+import { logger } from '../utils/logger.js'
 
 export const runBackupJob = async (): Promise<void> => {
+    logger.debug('runBackupJob() called')
+
     const targets = getBackupTargets()
 
-    console.log(
+    logger.info(
         `[Backup Job] Menemukan ${targets.length} backup target.`
     )
 
     for (const target of targets) {
         try {
-            console.log(
+            logger.info(
                 `[Backup Job] Memulai backup target: ${target.databaseName}`
             )
 
             await createBackup(target.id)
 
-            console.log(
+            logger.info(
                 `[Backup Job] Backup berhasil: ${target.databaseName}`
             )
         } catch (error) {
-            console.error(
-                `[Backup Job] Backup gagal: ${target.databaseName}`,
-                error
+            logger.error(
+                error,
+                `[Backup Job] Backup gagal: ${target.databaseName}`
             )
         }
     }
 
-    console.log('[Backup Job] Proses backup selesai.')
+    logger.info(
+        '[Backup Job] Proses backup selesai.'
+    )
 }
