@@ -22,9 +22,9 @@ export interface BackupResult {
 export interface BackupHistory {
     id: number
     backupTargetId: number
-    fileName: string
-    filePath: string
-    fileSize: number
+    fileName: string | null
+    filePath: string | null
+    fileSize: number | null
     status: string
     createdAt: string
 }
@@ -41,23 +41,63 @@ const sanitizeFileName = (
 export const createBackup = async (
     backupTargetId: number
 ) => {
-    const backup = await generateDatabaseBackup(
-        backupTargetId
-    )
+    let backup: BackupResult | null = null
 
-    const history = await createBackupHistory(
-        backupTargetId,
-        backup,
-        'success'
-    )
+    try {
+        // 1. Generate backup
+        backup = await generateDatabaseBackup(
+            backupTargetId
+        )
 
-    await sendTelegramDocument(
-        backup.filePath
-    )
+        // 2. Kirim backup ke Telegram
+        await sendTelegramDocument(
+            backup.filePath
+        )
 
-    return {
-        backup,
-        history,
+        // 3. Semua proses berhasil
+        const history = await createBackupHistory(
+            backupTargetId,
+            backup,
+            'success'
+        )
+
+        return {
+            backup,
+            history,
+        }
+    } catch (error) {
+        console.error(
+            `[Backup] Backup target ${backupTargetId} gagal:`,
+            error
+        )
+
+        // 4. Jika backup file sudah berhasil dibuat,
+        //    simpan metadata file.
+        if (backup) {
+            const history = await createBackupHistory(
+                backupTargetId,
+                backup,
+                'failed'
+            )
+
+            return {
+                backup,
+                history,
+            }
+        }
+
+        // 5. Jika generate backup gagal,
+        //    belum ada file yang bisa dicatat.
+        const history = await createBackupHistory(
+            backupTargetId,
+            null,
+            'failed'
+        )
+
+        return {
+            backup: null,
+            history,
+        }
     }
 }
 
@@ -120,12 +160,12 @@ export const generateDatabaseBackup = async (
 
 export const createBackupHistory = async (
     backupTargetId: number,
-    backup: BackupResult,
+    backup: BackupResult | null,
     status: string
 ): Promise<BackupHistory> => {
-    const fileStats = await stat(
-        backup.filePath
-    )
+    const fileStats = backup
+        ? await stat(backup.filePath)
+        : null
 
     const result = db
         .prepare(`
@@ -140,33 +180,33 @@ export const createBackupHistory = async (
         `)
         .run(
             backupTargetId,
-            backup.fileName,
-            backup.filePath,
-            fileStats.size,
+            backup?.fileName ?? null,
+            backup?.filePath ?? null,
+            fileStats?.size ?? null,
             status
         )
 
     const history = db
         .prepare(`
-            SELECT
-                id,
-                backup_target_id,
-                file_name,
-                file_path,
-                file_size,
-                status,
-                created_at
-            FROM backup_history
-            WHERE id = ?
-        `)
+        SELECT
+            id,
+            backup_target_id,
+            file_name,
+            file_path,
+            file_size,
+            status,
+            created_at
+        FROM backup_history
+        WHERE id = ?
+    `)
         .get(
             result.lastInsertRowid
         ) as {
             id: number
             backup_target_id: number
-            file_name: string
-            file_path: string
-            file_size: number
+            file_name: string | null
+            file_path: string | null
+            file_size: number | null
             status: string
             created_at: string
         }
@@ -183,7 +223,8 @@ export const createBackupHistory = async (
     }
 }
 
-export const getBackupHistoryList = (): (BackupHistory & { databaseName: string; host: string })[] => {
+export const getBackupHistoryList = (): (BackupHistory &
+{ databaseName: string; host: string })[] => {
     const rows = db
         .prepare(`
             SELECT 
@@ -203,9 +244,9 @@ export const getBackupHistoryList = (): (BackupHistory & { databaseName: string;
         .all() as Array<{
             id: number
             backup_target_id: number
-            file_name: string
-            file_path: string
-            file_size: number
+            file_name: string | null
+            file_path: string | null
+            file_size: number | null
             status: string
             created_at: string
             database_name: string | null

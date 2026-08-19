@@ -33,17 +33,17 @@ export const initDatabase = () => {
     );
 
     CREATE TABLE IF NOT EXISTS backup_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        backup_target_id INTEGER NOT NULL,
-        file_name TEXT NOT NULL,
-        file_path TEXT NOT NULL,
-        file_size INTEGER NOT NULL,
-        status TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    backup_target_id INTEGER NOT NULL,
+    file_name TEXT,
+    file_path TEXT,
+    file_size INTEGER,
+    status TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-        FOREIGN KEY (backup_target_id)
-            REFERENCES backup_targets(id)
-            ON DELETE CASCADE
+    FOREIGN KEY (backup_target_id)
+        REFERENCES backup_targets(id)
+        ON DELETE CASCADE
     );
   `)
 
