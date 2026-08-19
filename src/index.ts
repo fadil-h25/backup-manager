@@ -22,7 +22,10 @@ import { getBackupTargetById } from './services/backup-target.service.js'
 import { testMySQLConnectionController } from './controllers/mysql.controller.js'
 import { createBackupController, getBackupHistoryController } from './controllers/backup.controller.js'
 import { BackupHistoryPage } from './pages/backup-history/index.js'
+import { startBackupScheduler } from './scheduler/backup.scheduler.js'
+
 initDatabase();
+startBackupScheduler();
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')

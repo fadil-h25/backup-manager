@@ -20,4 +20,5 @@ export const env = {
     backupEncryptionKey: Buffer.from(encryptionKey, 'hex'),
     tokenBotTelegram,
     chatIdGroupTelegram,
+    backupSchedule: process.env.BACKUP_SCHEDULE ?? "0 11 * * *",
 }
