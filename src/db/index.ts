@@ -14,7 +14,7 @@ export const initDatabase = () => {
     db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nama TEXT NOT NULL,SC  HS
+        nama TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
     );
@@ -25,7 +25,7 @@ export const initDatabase = () => {
         host TEXT NOT NULL,
         port INTEGER NOT NULL DEFAULT 3306,
         username TEXT NOT NULL,
-        password TEXT NOT NULL,
+        password TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
