@@ -21,8 +21,7 @@ export const createBackupTargetController = async (c: Context) => {
             !body.databaseName ||
             !body.host ||
             !body.port ||
-            !body.username ||
-            !body.password
+            !body.username
         ) {
             return c.json(
                 {
@@ -38,7 +37,7 @@ export const createBackupTargetController = async (c: Context) => {
             host: body.host.trim(),
             port: Number(body.port),
             username: body.username.trim(),
-            password: body.password,
+            password: body.password || '',
         })
 
         return c.json(

@@ -19,7 +19,13 @@ import { BackupTargetsPage } from './pages/backup-target/index.js'
 import { BackupTargetCreatePage } from './pages/backup-target/create.js'
 import { BackupTargetEditPage } from './pages/backup-target/edit.js'
 import { getBackupTargetById } from './services/backup-target.service.js'
+import { testMySQLConnectionController } from './controllers/mysql.controller.js'
+import { createBackupController, getBackupHistoryController } from './controllers/backup.controller.js'
+import { BackupHistoryPage } from './pages/backup-history/index.js'
+import { startBackupScheduler } from './scheduler/backup.scheduler.js'
+
 initDatabase();
+startBackupScheduler();
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
@@ -46,6 +52,9 @@ app.get('/backup-targets/:id/edit', (c) => {
   }
   return c.html(BackupTargetEditPage({ target }));
 });
+app.get('/backup-history', (c) => {
+  return c.html(BackupHistoryPage());
+});
 
 // API
 // Auth
@@ -57,6 +66,22 @@ app.get('/api/backup-targets', getBackupTargetsController)
 app.get('/api/backup-targets/:id', getBackupTargetByIdController)
 app.put('/api/backup-targets/:id', updateBackupTargetController)
 app.delete('/api/backup-targets/:id', deleteBackupTargetController)
+
+// MysQL Connection Test
+app.get(
+  '/api/backup-targets/:id/test-connection',
+  testMySQLConnectionController
+);
+
+// Backup
+app.post(
+  '/api/backup-targets/:id/backup',
+  createBackupController
+);
+app.get(
+  '/api/backup-history',
+  getBackupHistoryController
+);
 
 
 serve({
